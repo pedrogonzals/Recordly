@@ -1,0 +1,88 @@
+﻿@{
+   
+    if (!WebSecurity.IsAuthenticated) {
+        Response.Redirect("~/Account/Login?returnUrl="
+            + Request.Url.LocalPath);
+    }
+    Layout = "~/_SiteLayout.cshtml";
+    Page.Title = "Members Information";
+
+    //SQL command to read all records from albums
+    var db = Database.Open("Records");
+    var selectCommand = "SELECT CDs.*, Tracks.*, Songs.* FROM CDs, Tracks, Songs WHERE CDs.CDID=Tracks.TracksCDId AND Tracks.TracksSongId=Songs.SongId" ;
+    var searchTerm= "";
+
+       
+     //SQL to fetch and search by artist
+    if(!Request.QueryString["searchArtist"].IsEmpty() ) {
+       selectCommand = "SELECT CDs.*, Tracks.*, Songs.* FROM CDs, Tracks, Songs WHERE CDArtist = @0 AND CDs.CDID=Tracks.TracksCDId AND Tracks.TracksSongId=Songs.SongId" ;
+       searchTerm = Request.QueryString["searchArtist"];
+    }
+   
+    var selectedData = db.Query(selectCommand, searchTerm);
+    var grid = new WebGrid(source: selectedData);
+
+ 
+}
+
+<!DOCTYPE html>
+
+<html lang="en">
+    <head>
+        <meta charset="utf-8" />
+        <title></title>
+        <style type="text/css">
+            .grid { margin: 4px; border-collapse: collapse; width: 600px; }
+            .grid th, .grid td { border: 1px solid #C0C0C0; padding: 5px; }
+            .head { background-color: #E8E8E8; font-weight: bold; color: #FFF; }
+            .alt { background-color: #E8E8E8; color: #000; }
+</style>   
+    </head>
+    <body>
+            Hello @WebSecurity.CurrentUserName
+        
+
+ <h1>Albums</h1>
+
+ <form method="get">
+  <div>
+    <label for="searchArtist">Artist to look for:</label>
+    <input type="text" name="searchArtist" value="@Request.QueryString["searchArtist"]" />
+    <input type="Submit" value="Search artist" /><br/>
+    (Leave blank to list all Albums.)<br/>
+    </div>
+     <p></p>
+     <aside>
+    <h3>Aside Title</h3>
+    <p>
+        Use this area to provide additional information.
+    </p>
+    <ul>
+        <li><a href="~/Members/PageStart">Main</a></li>
+        <li><a href="~/About">About</a></li>
+        <li><a href="~/Contact">Contact</a></li>
+    </ul>
+</aside>
+           
+</form>
+
+<div>
+    @grid.GetHtml(
+    tableStyle: "grid",
+    headerStyle: "head",
+    alternatingRowStyle: "alt",
+    columns: grid.Columns(
+        grid.Column("CDName"),
+        grid.Column("CDArtist"),
+        grid.Column("CDYear"),
+        grid.Column("CDFavorite"),
+        grid.Column("SongName"),
+        grid.Column("SongMin"),
+        grid.Column("SongFavorite")
+        )
+        )
+</div>
+<p></p>
+
+    </body>
+</html>

@@ -1,0 +1,61 @@
+﻿@{
+    Validation.RequireField("name", "You must enter a name");
+    Validation.RequireField("artist", "artist is required");
+    Validation.RequireField("year", "You haven't entered a year");
+    Validation.RequireField("favorite", "You haven't entered a favorite");
+
+    var name = "";
+    var artist = "";
+    var year = "";
+    var favorite = "";
+
+    if(IsPost && Validation.IsValid()){
+        name = Request.Form["name"];
+        artist = Request.Form["artist"];
+        year = Request.Form["year"];
+        favorite = Request.Form["favorite"];
+
+        var db = Database.Open("Records");
+        var insertCommand = "INSERT INTO CDs (CDname, CDArtist, CDyear, CDFavorite) VALUES(@0, @1, @2, @3)";
+        db.Execute(insertCommand, name , artist, year, favorite);
+
+        Response.Redirect("~/Members/PageStart");
+    }
+}
+
+<!DOCTYPE html>
+
+<html>
+<head>
+<meta charset="utf-8" />
+<title>Add an Album</title>
+</head>
+<body>
+  <h1>Add Album</h1>
+  <form method="post">
+    <fieldset>
+      <legend>Album Information</legend>
+      <p><label for="Name">Name:</label>
+         <input type="text" name="name" value="@Request.Form["name"]" />
+           @Html.ValidationMessage("name")
+      </p>
+
+      <p><label for="Artist">Artist:</label>
+         <input type="text" name="artist" value="@Request.Form["artist"]" />
+          @Html.ValidationMessage("artist")
+      </p>
+
+      <p><label for="year">Year:</label>
+         <input type="text" name="year" value="@Request.Form["year"]" />
+          @Html.ValidationMessage("year")
+      </p>
+       <p><label for="favorite">Favorite:</label>
+         <input type="text" name="favorite" value="@Request.Form["favorite"]" />
+           @Html.ValidationMessage("favorite")
+      </p>
+
+      <p><input type="submit" name="buttonSubmit" value="Add Album" /></p>
+    </fieldset>
+  </form>
+</body>
+</html>
